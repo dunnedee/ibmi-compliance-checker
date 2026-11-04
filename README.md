@@ -35,7 +35,13 @@ A simple Windows tool that checks an IBM i (AS400) system against the **CIS IBM 
 5. Click **Export** to save the HTML or CSV report.
 
 Results are also saved automatically to the `reports` folder.
-![Results](screenshots/Configuration Review Tool.png)
+
+
+![Connection tab](screenshots/connection.png)
+
+
+
+
 ---
 
 ## What the results mean
