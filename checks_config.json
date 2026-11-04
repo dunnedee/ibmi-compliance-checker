@@ -1,0 +1,1435 @@
+{
+  "_readme": "Each check maps to a commonly-referenced IBM i hardening control. The 'cis_ref' field is left blank intentionally - copy the exact control number/title from your own licensed copy of the CIS IBM i Benchmark and paste it in here so reports reference the correct control. Add/edit/remove checks freely - the engine just iterates this list.",
+  "checks": [
+    {
+      "id": "SV-001",
+      "cis_ref": "5.1.1.33",
+      "name": "System Security Level (QSECURITY)",
+      "category": "System Values - Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSECURITY'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSECURITY)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 40
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QSECURITY to 40 or 50. Levels below 40 do not fully enforce OS-level object authority checking and allow bypass of standard security. Use: CHGSYSVAL SYSVAL(QSECURITY) VALUE('40'). Requires IPL to take effect."
+    },
+    {
+      "id": "SV-002",
+      "cis_ref": "5.1.1.20",
+      "name": "Maximum Sign-On Attempts (QMAXSIGN)",
+      "category": "System Values - Authentication",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QMAXSIGN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QMAXSIGN)\"",
+      "evaluation": {
+        "type": "numeric_max_or_notnomax",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "max": 5
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QMAXSIGN'",
+      "recommendation": "Set QMAXSIGN to 5 or fewer failed attempts (never *NOMAX). Use: CHGSYSVAL SYSVAL(QMAXSIGN) VALUE('5')."
+    },
+    {
+      "id": "SV-003",
+      "cis_ref": "5.1.1.19",
+      "name": "Action When Max Sign-On Attempts Reached (QMAXSGNACN)",
+      "category": "System Values - Authentication",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QMAXSGNACN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QMAXSGNACN)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          2,
+          3
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "CIS's own recommended value is 2 (disable the user profile on reaching the max sign-on limit); 3 (disable both the device and the profile) is also accepted here since it's strictly more restrictive. Use: CHGSYSVAL SYSVAL(QMAXSGNACN) VALUE('2')."
+    },
+    {
+      "id": "SV-004",
+      "cis_ref": "5.1.1.15",
+      "name": "Inactive Job Time-Out (QINACTITV)",
+      "category": "System Values - Session Management",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QINACTITV'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QINACTITV)\"",
+      "evaluation": {
+        "type": "numeric_max_or_notnomax",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "max": 30
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QINACTITV to 30 minutes or less (never *NONE). Use: CHGSYSVAL SYSVAL(QINACTITV) VALUE('30')."
+    },
+    {
+      "id": "SV-005",
+      "cis_ref": "5.1.1.16",
+      "name": "Inactive Job Time-Out Action (QINACTMSGQ)",
+      "category": "System Values - Session Management",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QINACTMSGQ'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QINACTMSGQ)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*DSCJOB"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QINACTMSGQ'",
+      "recommendation": "CIS's recommended value is specifically *DSCJOB (disconnect the job on inactivity timeout). Use: CHGSYSVAL SYSVAL(QINACTMSGQ) VALUE('*DSCJOB')."
+    },
+    {
+      "id": "SV-006",
+      "cis_ref": "5.1.1.22",
+      "name": "Password Expiration Interval (QPWDEXPITV)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDEXPITV'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDEXPITV)\"",
+      "evaluation": {
+        "type": "numeric_max_or_notnomax",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "max": 45
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "CIS's recommended value is 45 days or fewer (never *NOMAX). Use: CHGSYSVAL SYSVAL(QPWDEXPITV) VALUE('45')."
+    },
+    {
+      "id": "SV-007",
+      "cis_ref": "",
+      "name": "Minimum Password Length (QPWDMINLEN)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDMINLEN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDMINLEN)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 8
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QPWDMINLEN'",
+      "recommendation": "Note: this benchmark doesn't set a minimum length via the legacy QPWDMINLEN system value directly - at QPWDLVL 2+ it recommends composition instead via QPWDRULES (see the Password Composition Rules check, CIS 5.1.1.26), which includes a *MINLEN8 requirement. Keep this check as a supplementary/legacy-compatibility control."
+    },
+    {
+      "id": "SV-008",
+      "cis_ref": "5.1.1.24",
+      "name": "Password Level / Hashing Strength (QPWDLVL)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDLVL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDLVL)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 4
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QPWDLVL'",
+      "recommendation": "CIS's recommended value is 4 (the strongest password level, dropping legacy short/weak password support entirely). This can affect compatibility with older clients/applications still expecting legacy password rules - test before changing in production. Use: CHGSYSVAL SYSVAL(QPWDLVL) VALUE(4)."
+    },
+    {
+      "id": "SV-009",
+      "cis_ref": "5.1.1.1",
+      "name": "Restrict Object Restore (QALWOBJRST)",
+      "category": "System Values - Object Integrity",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QALWOBJRST'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QALWOBJRST)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*ALWPTF",
+          "*NONE"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QALWOBJRST'",
+      "recommendation": "CIS's recommended value is *ALWPTF (restrict restoration of security-sensitive objects, but still permit PTF application); *NONE is also accepted here as strictly more restrictive, though it will also block routine PTF installs unless temporarily relaxed. Use: CHGSYSVAL SYSVAL(QALWOBJRST) VALUE('*ALWPTF')."
+    },
+    {
+      "id": "SV-010",
+      "cis_ref": "",
+      "name": "Verify Object on Restore (QVFYOBJRST)",
+      "category": "System Values - Object Integrity",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QVFYOBJRST'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QVFYOBJRST)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 3
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QVFYOBJRST to 3 or higher to reject or accept-with-warning objects whose digital signature verification fails."
+    },
+    {
+      "id": "SV-011",
+      "cis_ref": "5.1.1.3",
+      "name": "Auditing Control (QAUDCTL)",
+      "category": "System Values - Auditing",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUDCTL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUDCTL)\"",
+      "evaluation": {
+        "type": "string_contains_all",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "required_substrings": [
+          "*NOQTEMP",
+          "*OBJAUD",
+          "*AUDLVL"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUDCTL'",
+      "recommendation": "CIS's recommended value is *NOQTEMP *OBJAUD *AUDLVL. Use: CHGSYSVAL SYSVAL(QAUDCTL) VALUE('*NOQTEMP *OBJAUD *AUDLVL')."
+    },
+    {
+      "id": "SV-012",
+      "cis_ref": "5.1.1.6",
+      "name": "Security-Relevant Audit Events (QAUDLVL)",
+      "category": "System Values - Auditing",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUDLVL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUDLVL)\"",
+      "evaluation": {
+        "type": "string_contains_all",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "required_substrings": [
+          "*AUTFAIL",
+          "*CREATE",
+          "*DELETE",
+          "*OBJMGT",
+          "*PGMFAIL",
+          "*SAVRST",
+          "*SECURITY",
+          "*SERVICE",
+          "*SYSMGT"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUDLVL'",
+      "recommendation": "CIS's recommended value includes *AUTFAIL *CREATE *DELETE *OBJMGT *PGMFAIL *SAVRST *SECURITY *SERVICE *SYSMGT. Use: CHGSYSVAL SYSVAL(QAUDLVL) VALUE('*AUTFAIL *CREATE *DELETE *OBJMGT *PGMFAIL *SAVRST *SECURITY *SERVICE *SYSMGT')."
+    },
+    {
+      "id": "SV-013",
+      "cis_ref": "5.1.1.13",
+      "name": "Display Sign-On Information (QDSPSGNINF)",
+      "category": "System Values - Authentication",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QDSPSGNINF'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QDSPSGNINF)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          1
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QDSPSGNINF to 1 so users are shown previous sign-on date/time and invalid attempt counts, aiding detection of unauthorized access attempts."
+    },
+    {
+      "id": "SV-014",
+      "cis_ref": "5.1.1.18",
+      "name": "Limit Security Officer Device Access (QLMTSECOFR)",
+      "category": "System Values - Authorization",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QLMTSECOFR'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QLMTSECOFR)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          0
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "FLAG FOR VERIFICATION: this benchmark's stated target for QLMTSECOFR is 0, which runs counter to common IBM i hardening guidance (which usually recommends 1, requiring *ALLOBJ/*SERVICE users to have explicit device authority). The benchmark's rationale/audit text for this control is blank in the source document, so this may be a documentation issue in that specific edition - verify the intended value directly with CIS or your own risk assessment before treating a mismatch here as a definite finding either way."
+    },
+    {
+      "id": "SV-015",
+      "cis_ref": "5.1.1.17",
+      "name": "Limit Device Sessions (QLMTDEVSSN)",
+      "category": "System Values - Session Management",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QLMTDEVSSN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QLMTDEVSSN)\"",
+      "evaluation": {
+        "type": "numeric_min_max_range",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 1,
+        "max": 9
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QLMTDEVSSN'",
+      "recommendation": "CIS's recommended value is any value between 1 and 9 (never *NOMAX/0). Use: CHGSYSVAL SYSVAL(QLMTDEVSSN) VALUE(n)."
+    },
+    {
+      "id": "UP-001",
+      "cis_ref": "4.4",
+      "name": "User Profiles With *ALLOBJ Special Authority",
+      "category": "User Profiles - Privileged Access",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, USER_CLASS_NAME, SPECIAL_AUTHORITIES, PREVIOUS_SIGNON FROM QSYS2.USER_INFO WHERE SPECIAL_AUTHORITIES LIKE '%*ALLOBJ%' ORDER BY AUTHORIZATION_NAME",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Manual review - list is evidence, not an automatic pass/fail. Flag as FAIL if count is high or contains unexpected/non-admin accounts."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE SPECIAL_AUTHORITIES LIKE '%*ALLOBJ%'",
+      "recommendation": "Review every profile with *ALLOBJ. Remove from profiles that don't require it; use group profiles/authorization lists and function usage instead of broad *ALLOBJ grants. Aim for the smallest practical *ALLOBJ population."
+    },
+    {
+      "id": "UP-002",
+      "cis_ref": "4.8",
+      "name": "Enabled Profiles With No Password Expiration (*NOMAX / PWDEXPITV=*NOMAX or PWDEXPIRE=NO indefinitely)",
+      "category": "User Profiles - Password Policy",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, PASSWORD_EXPIRATION_INTERVAL, USER_CLASS_NAME FROM QSYS2.USER_INFO WHERE STATUS = '*ENABLED' AND (PASSWORD_EXPIRATION_INTERVAL = -1 OR PASSWORD_EXPIRATION_INTERVAL IS NULL) ORDER BY AUTHORIZATION_NAME",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Manual review - non-expiring passwords on enabled profiles should be justified (e.g. service accounts with compensating controls)."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE STATUS='*ENABLED' AND PASSWORD_EXPIRATION_INTERVAL IN (-1, NULL)",
+      "recommendation": "Ensure every enabled interactive user profile inherits a bounded password expiration interval (QPWDEXPITV or profile-specific override). Any exceptions (service accounts) should be documented and have compensating controls (IP restriction, no interactive sign-on capability). CIS notes service/non-interactive profiles may reasonably be excluded and set to *NOMAX by policy."
+    },
+    {
+      "id": "UP-003",
+      "cis_ref": "4.6",
+      "name": "Profiles With Default/Blank Password Status",
+      "category": "User Profiles - Password Policy",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, USER_DEFAULT_PASSWORD, PASSWORD_EXPIRATION_INTERVAL FROM QSYS2.USER_INFO WHERE USER_DEFAULT_PASSWORD = 'YES'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "USER_DEFAULT_PASSWORD='YES' means the profile's password still matches its profile name - a default credential guessable with zero reconnaissance."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE USER_DEFAULT_PASSWORD='YES'",
+      "recommendation": "Reset the password on every listed profile and force expiry: CHGUSRPRF USRPRF(profile) PASSWORD(new-value) PWDEXP(*YES). Consider scheduling ANZDFTPWD ACTION(*DISABLE) periodically."
+    },
+    {
+      "id": "UP-004",
+      "cis_ref": "",
+      "name": "Disabled Profiles That Still Hold *ALLOBJ or Other Powerful Authorities",
+      "category": "User Profiles - Housekeeping",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, SPECIAL_AUTHORITIES, PREVIOUS_SIGNON FROM QSYS2.USER_INFO WHERE STATUS = '*DISABLED' AND SPECIAL_AUTHORITIES <> '' ORDER BY AUTHORIZATION_NAME",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Evidence list - disabled profiles retaining powerful authorities should generally be reviewed and cleaned up (or deleted) as part of leaver/decommission process."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE STATUS='*DISABLED' AND SPECIAL_AUTHORITIES<>''",
+      "recommendation": "Periodically review disabled profiles; remove special authorities and/or delete profiles that are no longer needed (leavers, decommissioned service accounts) per your account lifecycle policy."
+    },
+    {
+      "id": "EX-001",
+      "cis_ref": "5.2.7",
+      "name": "Registered Network Exit Point Programs (FTP, ODBC, DDM, etc.)",
+      "category": "Network - Exit Points",
+      "odbc_query": "SELECT EXIT_POINT_NAME, EXIT_POINT_FORMAT, EXIT_PROGRAM_LIBRARY, EXIT_PROGRAM, EXIT_PROGRAM_NUMBER FROM QSYS2.EXIT_PROGRAM_INFO ORDER BY EXIT_POINT_NAME, EXIT_PROGRAM_NUMBER",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "QSYS2.EXIT_PROGRAM_INFO lists every currently-registered exit program system-wide (this view - not EXIT_POINT_INFO - carries the program/library columns). Cross-reference against the network-facing exit point families of interest (FTP, ODBC/JDBC/DRDA, remote command, NetServer) - see EX-002 for that narrowed view."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.EXIT_PROGRAM_INFO ORDER BY EXIT_POINT_NAME",
+      "recommendation": "Confirm exit programs are registered for the network server exit points relevant to your environment (FTP, ODBC/JDBC/DRDA, DDM, remote command, SQL). Where none are registered, evaluate deploying a network security exit-point product (or custom exit programs) to enforce authority, logging, and IP/user restrictions equivalent to 5250 menu security."
+    },
+    {
+      "id": "NW-001",
+      "cis_ref": "",
+      "name": "TELNET Server Enabled",
+      "category": "Network - Services",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.NETSTAT_SERVER_INFO WHERE SERVER_NAME LIKE '%TELNET%'",
+      "recommendation": "Disable the unencrypted TELNET server (or enforce TELNET over SSL/TLS only) - plaintext TELNET exposes 5250 session credentials and data to network sniffing. Use SSH or SSL-wrapped TELNET for terminal access instead.",
+      "manual_note": "No QSYS2 view could be confirmed for simple TELNET server active/inactive status specifically (distinct from the TLS-enforcement attribute covered by NW-004, which does have a confirmed view). Verify via WRKTCPSTS *TELNET or NETSTAT *CNN.",
+      "manual_command": "WRKTCPSTS *TELNET  (or NETSTAT *CNN and look for LOCAL_PORT 23/992 in Listen state)"
+    },
+    {
+      "id": "NW-002",
+      "cis_ref": "",
+      "name": "FTP Server Enabled",
+      "category": "Network - Services",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.NETSTAT_SERVER_INFO WHERE SERVER_NAME LIKE '%FTP%'",
+      "recommendation": "If FTP is not required, end it (ENDTCPSVR SERVER(*FTP)) and remove autostart. If required, ensure exit programs restrict access by user/IP/library and that credentials are not sent over untrusted networks without a VPN/tunnel.",
+      "manual_note": "No QSYS2 view could be confirmed for simple FTP server active/inactive status. Verify via WRKTCPSTS *FTP or NETSTAT *CNN.",
+      "manual_command": "WRKTCPSTS *FTP  (or NETSTAT *CNN and look for LOCAL_PORT 21/990 in Listen state)"
+    },
+    {
+      "id": "UP-005",
+      "cis_ref": "4.1",
+      "name": "User Profile Objects (*USRPRF) - *PUBLIC Authority",
+      "category": "User Profiles - Resource Security",
+      "odbc_query": "SELECT SYSTEM_OBJECT_NAME, OBJECT_TYPE, USER_NAME, OBJECT_AUTHORITY FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE = '*USRPRF' AND USER_NAME = '*PUBLIC' AND OBJECT_AUTHORITY <> '*EXCLUDE' AND SYSTEM_OBJECT_NAME NOT IN ('QDBSHR','QDBSHRDO','QTMPLPD')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Any *USRPRF object other than the three IBM-shipped exceptions (QDBSHR, QDBSHRDO, QTMPLPD) with *PUBLIC authority above *EXCLUDE is a finding - it lets any authenticated user attempt a profile swap without credentials."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE='*USRPRF' AND USER_NAME='*PUBLIC' AND OBJECT_AUTHORITY<>'*EXCLUDE'",
+      "recommendation": "Set *PUBLIC authority on every *USRPRF object back to *EXCLUDE (the shipped default), except the three IBM-supplied profiles that legitimately need broader public authority for print/database subsystem functions. Use GRTOBJAUT OBJ(profile) OBJTYPE(*USRPRF) USER(*PUBLIC) AUT(*EXCLUDE) REPLACE(*YES)."
+    },
+    {
+      "id": "UP-006",
+      "cis_ref": "4.2",
+      "name": "User Profile Objects (*USRPRF) - Private Authorities",
+      "category": "User Profiles - Resource Security",
+      "odbc_query": "SELECT SYSTEM_OBJECT_NAME, OBJECT_TYPE, USER_NAME, OBJECT_AUTHORITY FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE = '*USRPRF' AND USER_NAME <> '*PUBLIC' AND USER_NAME <> SYSTEM_OBJECT_NAME",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "A private authority grant on a *USRPRF object other than to its owner lets the grantee swap to that profile without its credentials. The only expected exception is a group profile granting its members the standard *USER DEF authority - anything broader (e.g. *EXECUTE/*USE granted to non-owners) is a finding."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE='*USRPRF' AND USER_NAME<>'*PUBLIC' AND USER_NAME<>SYSTEM_OBJECT_NAME",
+      "recommendation": "Remove any private authority to a *USRPRF object that isn't the profile's own owner grant or a group profile's standard member grant. Use RVKOBJAUT OBJ(profile) OBJTYPE(*USRPRF) USER(grantee) AUT(*ALL) to revoke unwanted private authorities."
+    },
+    {
+      "id": "UP-007",
+      "cis_ref": "4.3",
+      "name": "User Profile Object Ownership",
+      "category": "User Profiles - Resource Security",
+      "odbc_query": "SELECT SYSTEM_OBJECT_NAME, OBJECT_TYPE, OWNER FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE = '*USRPRF' AND USER_NAME = '*PUBLIC' AND OWNER NOT IN ('QSECOFR','QSYS')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Non-IBM *USRPRF objects should be owned by QSECOFR (or another tightly controlled security-officer-class profile), not by an individual admin or application profile, to avoid ownership-based privilege chains. A handful of IBM-shipped profiles have documented alternate owners (e.g. QFAXMSF/QAUTPROF) - exclude those known exceptions."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.OBJECT_PRIVILEGES WHERE OBJECT_TYPE='*USRPRF' AND OWNER NOT IN ('QSECOFR','QSYS')",
+      "recommendation": "Change ownership of any non-IBM *USRPRF object away from an individual/application profile to QSECOFR: CHGOBJOWN OBJ(profile) OBJTYPE(*USRPRF) NEWOWN(QSECOFR) CUROWNAUT(*REVOKE)."
+    },
+    {
+      "id": "UP-008",
+      "cis_ref": "4.5",
+      "name": "Action Auditing for Administrative Special-Authority Profiles",
+      "category": "User Profiles - Auditing",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, SPECIAL_AUTHORITIES, USER_ACTION_AUDIT_LEVEL FROM QSYS2.USER_INFO WHERE SPECIAL_AUTHORITIES <> '' AND (USER_ACTION_AUDIT_LEVEL IS NULL OR USER_ACTION_AUDIT_LEVEL NOT LIKE '%*CMD%')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Every profile carrying a special authority (*ALLOBJ, *SECADM, *SAVSYS, etc.) should have *CMD action auditing enabled so commands it runs are logged. Rows returned here are profiles missing that audit setting - exclude IBM-supplied profiles other than QSECOFR from scope."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE SPECIAL_AUTHORITIES<>'' AND USER_ACTION_AUDIT_LEVEL NOT LIKE '%*CMD%'",
+      "recommendation": "Enable command auditing on every privileged profile: CHGUSRAUD USRPRF(profile) AUDLVL(*CMD). This ensures actions taken under elevated authority are captured in the audit journal for later review."
+    },
+    {
+      "id": "UP-009",
+      "cis_ref": "4.7",
+      "name": "Inactive User Profiles (No Sign-On Within Policy Window)",
+      "category": "User Profiles - Housekeeping",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, PREVIOUS_SIGNON, DAYS_UNTIL_PASSWORD_EXPIRES FROM QSYS2.USER_INFO WHERE STATUS = '*ENABLED' AND (PREVIOUS_SIGNON IS NULL OR PREVIOUS_SIGNON < CURRENT_DATE - 90 DAYS)",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Enabled profiles with no sign-on in the last 90 days (or ever) are candidates for disablement - stale accounts are a common lateral-movement and persistence target. Adjust the 90-day window to your organization's policy."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE STATUS='*ENABLED' AND PREVIOUS_SIGNON < CURRENT_DATE - 90 DAYS",
+      "recommendation": "Disable profiles that are inactive beyond your policy window: CHGUSRPRF USRPRF(profile) STATUS(*DISABLED). After a further grace period, archive owned objects and remove the profile with DLTUSRPRF, reassigning object ownership first where needed."
+    },
+    {
+      "id": "UP-010",
+      "cis_ref": "4.9",
+      "name": "User Profiles With Unrestricted Command-Line Access",
+      "category": "User Profiles - Access Control",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, LIMIT_CAPABILITIES, SPECIAL_AUTHORITIES FROM QSYS2.USER_INFO WHERE LIMIT_CAPABILITIES <> '*YES' AND AUTHORIZATION_NAME NOT LIKE 'Q%'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Non-administrative, non-IBM profiles with LIMIT_CAPABILITIES other than *YES can enter arbitrary commands at a command line (5250, remote command server, etc.), well beyond an application's intended menu options. Review every row for business justification."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE LIMIT_CAPABILITIES<>'*YES' AND AUTHORIZATION_NAME NOT LIKE 'Q%'",
+      "recommendation": "For application/end-user profiles that don't need command-line access, set: CHGUSRPRF USRPRF(profile) LMTCPB(*YES). Note some IBM commands and third-party commands with ALWLMTUSR(*YES) can still be run by limited-capability users, and some remote interfaces (ODBC, remote command server) don't honor LMTCPB at all - pair this control with exit-point restrictions (see Exit Points check) for full coverage."
+    },
+    {
+      "id": "UP-011",
+      "cis_ref": "4.10",
+      "name": "IBM-Supplied User Profiles Modified From Shipped Defaults",
+      "category": "User Profiles - Housekeeping",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, NO_PASSWORD_INDICATOR, STATUS, USER_CLASS_NAME, INITIAL_PROGRAM_NAME, LIMIT_CAPABILITIES, SPECIAL_AUTHORITIES FROM QSYS2.USER_INFO WHERE AUTHORIZATION_NAME LIKE 'Q%' AND (NO_PASSWORD_INDICATOR = 'NO' OR SPECIAL_AUTHORITIES <> '')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "IBM-supplied profiles (Q-prefixed) are shipped with PASSWORD(*NONE) and minimal authorities. A row here (a password enabled, or special authorities present) means the profile was changed from its shipped state - compare against IBM's published table of default IBM-supplied profile settings for your release."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE AUTHORIZATION_NAME LIKE 'Q%' AND (NO_PASSWORD_INDICATOR='NO' OR SPECIAL_AUTHORITIES<>'')",
+      "recommendation": "Revert any IBM-supplied profile that has drifted from its documented shipped configuration: CHGUSRPRF USRPRF(profile) PASSWORD(*NONE) (and other parameters back to defaults) unless there is a specific, documented business reason. Also check no user profile lists an IBM-supplied profile as its GRPPRF or SUPGRPPRF."
+    },
+    {
+      "id": "UP-012",
+      "cis_ref": "4.11",
+      "name": "Group Profiles With a Password Set",
+      "category": "User Profiles - Password Policy",
+      "odbc_query": "SELECT DISTINCT G.AUTHORIZATION_NAME AS GROUP_PROFILE, G.NO_PASSWORD_INDICATOR FROM QSYS2.USER_INFO G WHERE G.AUTHORIZATION_NAME IN (SELECT DISTINCT GROUP_PROFILE_NAME FROM QSYS2.USER_INFO WHERE GROUP_PROFILE_NAME IS NOT NULL) AND G.NO_PASSWORD_INDICATOR = 'NO'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Group profiles exist purely to hold shared authorities for their members and should never be signed onto directly - a password on a group profile is an unnecessary, unmonitored back door into every member's privilege set."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO (group profiles) WHERE NO_PASSWORD_INDICATOR='NO'",
+      "recommendation": "Remove the password from every group profile: CHGUSRPRF USRPRF(group-profile) PASSWORD(*NONE)."
+    },
+    {
+      "id": "SV-016",
+      "cis_ref": "5.1.1.2",
+      "name": "Attention Key Program (QATNPGM)",
+      "category": "System Values - Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QATNPGM'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QATNPGM)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*NONE"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QATNPGM'",
+      "recommendation": "Set QATNPGM to *NONE unless a specific, reviewed attention-key program is required - an unreviewed attention program is an easy way to intercept or hijack an interactive session."
+    },
+    {
+      "id": "SV-017",
+      "cis_ref": "5.1.1.4",
+      "name": "Auditing End Action (QAUDENDACN)",
+      "category": "System Values - Auditing",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUDENDACN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUDENDACN)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*NOTIFY"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUDENDACN'",
+      "recommendation": "Set QAUDENDACN to *NOTIFY so an operator is alerted if the audit journal receiver can't be attached, instead of the system silently failing to audit (*PWRDWNSYS) or continuing unaudited (*NOTIFY is the safer middle ground of the two options)."
+    },
+    {
+      "id": "SV-018",
+      "cis_ref": "5.1.1.5",
+      "name": "Auditing Force Level (QAUDFRCLVL)",
+      "category": "System Values - Auditing",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUDFRCLVL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUDFRCLVL)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*SYS"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUDFRCLVL'",
+      "recommendation": "Set QAUDFRCLVL to *SYS so audit journal entries are force-written to disk at the system-determined interval, minimizing the window in which recent audit records could be lost on an abnormal IPL."
+    },
+    {
+      "id": "SV-019",
+      "cis_ref": "5.1.1.7",
+      "name": "Security Audit Level Extensions (QAUDLVL2)",
+      "category": "System Values - Auditing",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUDLVL2'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUDLVL2)\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "QAUDLVL2 is only used when QAUDLVL contains *AUDLVL2; review its contents against your organization's audit policy rather than a single fixed value - most environments leave it *NONE unless extra audit categories (e.g. *PTFOPR, *AUTFAIL granularity) are explicitly required."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUDLVL2'",
+      "recommendation": "Review QAUDLVL2 against your audit policy. If unused, CHGSYSVAL SYSVAL(QAUDLVL2) VALUE('*NONE') is the common baseline."
+    },
+    {
+      "id": "SV-020",
+      "cis_ref": "5.1.1.8",
+      "name": "Automatic Device Configuration (QAUTOCFG)",
+      "category": "System Values - Device Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUTOCFG'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUTOCFG)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          0
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Turn off automatic device configuration: CHGSYSVAL SYSVAL(QAUTOCFG) VALUE('0'). Auto-configuring unknown devices makes it easier for a rogue terminal/printer to attach without administrator awareness."
+    },
+    {
+      "id": "SV-021",
+      "cis_ref": "5.1.1.9",
+      "name": "Automatic Remote Controller Configuration (QAUTORMT)",
+      "category": "System Values - Device Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUTORMT'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUTORMT)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          0
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Turn off automatic remote controller configuration: CHGSYSVAL SYSVAL(QAUTORMT) VALUE('0'), for the same reason as QAUTOCFG - unattended auto-configuration of remote controllers is an unnecessary attack surface."
+    },
+    {
+      "id": "SV-022",
+      "cis_ref": "5.1.1.10",
+      "name": "Automatic Virtual Device Creation (QAUTOVRT)",
+      "category": "System Values - Device Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QAUTOVRT'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QAUTOVRT)\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "There's no universal correct number - review whether the configured value is a deliberate, sized-for-business-need figure (commonly recommended to stay well under the historical 32,500 legacy ceiling) rather than an uncapped/very large default that was never revisited."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QAUTOVRT'",
+      "recommendation": "Set QAUTOVRT to a value that comfortably covers legitimate concurrent virtual sessions for your environment, not an arbitrarily large or default figure: CHGSYSVAL SYSVAL(QAUTOVRT) VALUE(n)."
+    },
+    {
+      "id": "SV-023",
+      "cis_ref": "5.1.1.11",
+      "name": "Default Create Authority (QCRTAUT)",
+      "category": "System Values - Object Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QCRTAUT'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QCRTAUT)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*USE"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QCRTAUT'",
+      "recommendation": "Set QCRTAUT to *USE (not *CHANGE or *ALL) so newly created objects don't grant *PUBLIC more than read/run access by default: CHGSYSVAL SYSVAL(QCRTAUT) VALUE('*USE'). Note this is the system-wide default only - library-level CRTAUT overrides take precedence for objects created in that library."
+    },
+    {
+      "id": "SV-024",
+      "cis_ref": "5.1.1.12",
+      "name": "Disconnected Job Interval (QDSCJOBITV)",
+      "category": "System Values - Session Management",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QDSCJOBITV'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QDSCJOBITV)\"",
+      "evaluation": {
+        "type": "numeric_max_or_notnomax",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "max": 30
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QDSCJOBITV to 30 minutes or less (never *NONE) so disconnected interactive jobs are ended rather than sitting available for reconnection indefinitely: CHGSYSVAL SYSVAL(QDSCJOBITV) VALUE('30')."
+    },
+    {
+      "id": "SV-025",
+      "cis_ref": "5.1.1.14",
+      "name": "Force Conversion on Restore (QFRCCVNRST)",
+      "category": "System Values - Object Integrity",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QFRCCVNRST'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QFRCCVNRST)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          3
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QFRCCVNRST to 3 so *PGM/*SRVPGM objects without a valid IBM-signed signature are converted/observed on restore rather than trusted blindly: CHGSYSVAL SYSVAL(QFRCCVNRST) VALUE('3')."
+    },
+    {
+      "id": "SV-026",
+      "cis_ref": "5.1.1.21",
+      "name": "Block Password Change Period (QPWDCHGBLK)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDCHGBLK'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDCHGBLK)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 24
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QPWDCHGBLK to 24 hours so a user can't immediately cycle back to a previous password by changing it multiple times in quick succession: CHGSYSVAL SYSVAL(QPWDCHGBLK) VALUE('24')."
+    },
+    {
+      "id": "SV-027",
+      "cis_ref": "5.1.1.23",
+      "name": "Password Expiration Warning Period (QPWDEXPWRN)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDEXPWRN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDEXPWRN)\"",
+      "evaluation": {
+        "type": "numeric_min",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "min": 7
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QPWDEXPWRN'",
+      "recommendation": "Set QPWDEXPWRN to at least 7 days so users get advance warning before their password expires, reducing help-desk lockout churn: CHGSYSVAL SYSVAL(QPWDEXPWRN) VALUE('7')."
+    },
+    {
+      "id": "SV-028",
+      "cis_ref": "5.1.1.25",
+      "name": "Required Difference in Passwords (QPWDRQDDIF)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDRQDDIF'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDRQDDIF)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          2
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QPWDRQDDIF to 2 (new password cannot match any of the last 24 passwords) to prevent short-cycle password reuse: CHGSYSVAL SYSVAL(QPWDRQDDIF) VALUE('2')."
+    },
+    {
+      "id": "SV-029",
+      "cis_ref": "5.1.1.26",
+      "name": "Password Composition Rules (QPWDRULES)",
+      "category": "System Values - Password Policy",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QPWDRULES'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QPWDRULES)\"",
+      "evaluation": {
+        "type": "string_contains_all",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "required_substrings": [
+          "*MINLEN8",
+          "*LMTPRFNAME",
+          "*ALLCRTCHG"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QPWDRULES'",
+      "recommendation": "Configure QPWDRULES with modern composition requirements rather than relying on legacy QPWDMINLEN/QPWDMAXLEN (which QPWDRULES supersedes at higher password levels). A reasonable baseline: *ALLCRTCHG *DGTLMTAJC *DGTLMTFST *DGTLMTLST *LMTPRFNAME *MAXLEN10 *MINLEN8 *REQANY3 *SPCCHRLMTAJC *SPCCHRLMTFST *SPCCHRLMTLST - adjust minimum length and complexity to your organization's policy."
+    },
+    {
+      "id": "SV-030",
+      "cis_ref": "5.1.1.28",
+      "name": "Remote Power-On/IPL (QRMTIPL)",
+      "category": "System Values - Remote Access",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QRMTIPL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QRMTIPL)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          0
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Disable remote power-on/IPL unless explicitly required and controlled: CHGSYSVAL SYSVAL(QRMTIPL) VALUE('0')."
+    },
+    {
+      "id": "SV-031",
+      "cis_ref": "5.1.1.29",
+      "name": "Remote Sign-On Verification (QRMTSIGN)",
+      "category": "System Values - Remote Access",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QRMTSIGN'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QRMTSIGN)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*VERIFY",
+          "*FRCSIGNON"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QRMTSIGN'",
+      "recommendation": "Set QRMTSIGN to *VERIFY (or the stricter *FRCSIGNON) so remote pass-through/DDM sessions still require credential verification rather than auto-signing on: CHGSYSVAL SYSVAL(QRMTSIGN) VALUE('*VERIFY')."
+    },
+    {
+      "id": "SV-032",
+      "cis_ref": "5.1.1.30",
+      "name": "Remote Service Attribute (QRMTSRVATR)",
+      "category": "System Values - Remote Access",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QRMTSRVATR'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QRMTSRVATR)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          0
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Disable the remote service attribute unless IBM support access is actively required for a specific engagement: CHGSYSVAL SYSVAL(QRMTSRVATR) VALUE('0')."
+    },
+    {
+      "id": "SV-033",
+      "cis_ref": "5.1.1.31",
+      "name": "Scan File Systems (QSCANFS)",
+      "category": "System Values - Malware Defense",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSCANFS'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSCANFS)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*ROOTOPNUD"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSCANFS'",
+      "recommendation": "Set QSCANFS to *ROOTOPNUD so IFS objects in scannable file systems are inspected by any registered scan-exit-point antivirus/malware product: CHGSYSVAL SYSVAL(QSCANFS) VALUE('*ROOTOPNUD'). This is only effective when a scan-capable product is actually installed and registered (see Malware Defenses)."
+    },
+    {
+      "id": "SV-034",
+      "cis_ref": "5.1.1.32",
+      "name": "Scan File System Control (QSCANFSCTL)",
+      "category": "System Values - Malware Defense",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSCANFSCTL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSCANFSCTL)\"",
+      "evaluation": {
+        "type": "string_contains_all",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "required_substrings": [
+          "*ERRFAIL",
+          "*NOWRTUPG"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSCANFSCTL'",
+      "recommendation": "Set QSCANFSCTL to include *ERRFAIL *NOWRTUPG: CHGSYSVAL SYSVAL(QSCANFSCTL) VALUE('*ERRFAIL *NOWRTUPG'), so a scan failure blocks access to the object rather than allowing it through, and objects aren't silently upgraded/rewritten without being rescanned."
+    },
+    {
+      "id": "SV-035",
+      "cis_ref": "5.1.1.34",
+      "name": "Shared Memory Control (QSHRMEMCTL)",
+      "category": "System Values - Object Integrity",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSHRMEMCTL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSHRMEMCTL)\"",
+      "evaluation": {
+        "type": "numeric_in_set",
+        "field": "CURRENT_NUMERIC_VALUE",
+        "allowed": [
+          1
+        ]
+      },
+      "command_used_label": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE, CURRENT_NUMERIC_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='...'",
+      "recommendation": "Set QSHRMEMCTL to 1 to allow the controlled use of writable shared-memory APIs needed by some middleware, while other system controls (object authority, restricted create/restore) limit misuse: CHGSYSVAL SYSVAL(QSHRMEMCTL) VALUE('1')."
+    },
+    {
+      "id": "SV-036",
+      "cis_ref": "5.1.1.36",
+      "name": "SSL/TLS Cipher Control (QSSLCSLCTL)",
+      "category": "System Values - Network Encryption",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSSLCSLCTL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSSLCSLCTL)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*OPSYS"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSSLCSLCTL'",
+      "recommendation": "Set QSSLCSLCTL to *OPSYS so IBM's curated, periodically updated cipher list (QSSLCSL) governs which TLS cipher suites the system offers, instead of a stale custom list: CHGSYSVAL SYSVAL(QSSLCSLCTL) VALUE('*OPSYS')."
+    },
+    {
+      "id": "SV-037",
+      "cis_ref": "5.1.1.35",
+      "name": "SSL/TLS Cipher Specification List (QSSLCSL)",
+      "category": "System Values - Network Encryption",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSSLCSL'",
+      "ssh_command": "system \"DSPSYSVAL QSSLCSL\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "QSSLCSL is a multi-value cipher list, not a single pass/fail threshold. Review its contents for weak/legacy ciphers (RC4, single-DES, export-grade, NULL ciphers) - none should be present. If QSSLCSLCTL is *OPSYS (see SV-036), this list is IBM-managed and should already exclude weak ciphers on a currently patched system."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSSLCSL'",
+      "recommendation": "Prefer QSSLCSLCTL(*OPSYS) so IBM manages this list; if a custom QSSLCSL is required, remove any weak/legacy cipher suite entries and keep it in sync with current TLS guidance (e.g. NIST SP 800-52)."
+    },
+    {
+      "id": "SV-038",
+      "cis_ref": "5.1.1.37",
+      "name": "SSL/TLS Protocol Versions (QSSLPCL)",
+      "category": "System Values - Network Encryption",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSSLPCL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSSLPCL)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "CURRENT_CHARACTER_VALUE",
+        "allowed": [
+          "*OPSYS"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSSLPCL'",
+      "recommendation": "Set QSSLPCL to *OPSYS so IBM's current, periodically updated protocol list applies (which excludes deprecated SSLv3/TLS 1.0/1.1 on a current release) rather than a hardcoded custom list that can drift out of date: CHGSYSVAL QSSLPCL VALUE('*OPSYS')."
+    },
+    {
+      "id": "SV-039",
+      "cis_ref": "5.1.1.38",
+      "name": "System Portion of the Library List (QSYSLIBL)",
+      "category": "System Values - Object Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QSYSLIBL'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QSYSLIBL)\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Every library in the system portion of the library list is implicitly searched for every job, so *PUBLIC authority on those libraries should be *USE, not *CHANGE/*ALL. This check surfaces the library list itself for you to cross-check authorities via DSPOBJAUT OBJ(library) OBJTYPE(*LIB) on each entry."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QSYSLIBL'",
+      "recommendation": "For every library in QSYSLIBL, ensure *PUBLIC authority is *USE (not broader): GRTOBJAUT OBJ(library) OBJTYPE(*LIB) USER(*PUBLIC) AUT(*USE) REPLACE(*YES). Keep the system library list minimal - every entry is exposed to every job on the system."
+    },
+    {
+      "id": "SV-040",
+      "cis_ref": "5.1.1.39",
+      "name": "Use Adopted Authority Restriction (QUSEADPAUT)",
+      "category": "System Values - Object Security",
+      "odbc_query": "SELECT SYSTEM_VALUE_NAME, CURRENT_CHARACTER_VALUE FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME = 'QUSEADPAUT'",
+      "ssh_command": "system \"DSPSYSVAL SYSVAL(QUSEADPAUT)\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "QUSEADPAUT should name an authorization list (created with AUT(*EXCLUDE) and owned by a controlled profile) that restricts which users can create new programs adopting owner authority. An empty/blank value means this control isn't in effect at all."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SYSTEM_VALUE_INFO WHERE SYSTEM_VALUE_NAME='QUSEADPAUT'",
+      "recommendation": "Create a dedicated authorization list, secure it to *EXCLUDE by default, and reference it in QUSEADPAUT so only explicitly authorized developers can compile adopted-authority programs: CRTAUTL AUTL(QUSEADPAUT) AUT(*EXCLUDE); CHGSYSVAL SYSVAL(QUSEADPAUT) VALUE('QUSEADPAUT')."
+    },
+    {
+      "id": "NW-003",
+      "cis_ref": "5.2.1",
+      "name": "Network Attribute - Job Action on Unrecognized Job (JOBACN)",
+      "category": "Network - Attributes",
+      "odbc_query": "SELECT JOB_ACTION FROM QSYS2.NETWORK_ATTRIBUTE_INFO",
+      "ssh_command": "system \"RTVNETA JOBACN(?)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "JOB_ACTION",
+        "allowed": [
+          "*REJECT"
+        ]
+      },
+      "command_used_label": "SELECT JOB_ACTION FROM QSYS2.NETWORK_ATTRIBUTE_INFO",
+      "recommendation": "Set the network attribute JOBACN to *REJECT so incoming pre-start/routing requests that don't match a defined job description are rejected outright rather than silently accepted: CHGNETA JOBACN(*REJECT)."
+    },
+    {
+      "id": "EX-002",
+      "cis_ref": "5.2.7",
+      "name": "Registered Exit Programs for Network Server Exit Points (Coverage Review)",
+      "category": "Network - Exit Points",
+      "odbc_query": "SELECT EXIT_POINT_NAME, EXIT_POINT_FORMAT, EXIT_PROGRAM_LIBRARY, EXIT_PROGRAM, EXIT_PROGRAM_NUMBER FROM QSYS2.EXIT_PROGRAM_INFO WHERE EXIT_POINT_NAME LIKE 'QIBM_QPWFS%' OR EXIT_POINT_NAME LIKE 'QIBM_QTMF%' OR EXIT_POINT_NAME LIKE 'QIBM_QZDA%' OR EXIT_POINT_NAME LIKE 'QIBM_QCA%' OR EXIT_POINT_NAME LIKE 'QIBM_QSY%' ORDER BY EXIT_POINT_NAME, EXIT_PROGRAM_NUMBER",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Narrows EX-001 to the network-facing exit point families (IFS/NetServer file serving, FTP, ODBC/JDBC/DRDA, remote command, central management). Zero rows returned here means NONE of these families currently has any exit program registered at all - itself a strong signal of a gap, not just an empty/clean result - since EXIT_PROGRAM_INFO only lists programs that ARE registered."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.EXIT_PROGRAM_INFO WHERE EXIT_POINT_NAME LIKE 'QIBM_QPWFS%' OR ... (network-facing families)",
+      "recommendation": "For each network-facing exit point family without a registered program, evaluate deploying an exit-point security product (or a custom exit program) and register it with ADDEXITPGM, so remote file/database/command access is subject to the same authorization and logging discipline as a 5250 session."
+    },
+    {
+      "id": "FU-001",
+      "cis_ref": "5.2.8",
+      "name": "Function Usage Defaults for Security-Sensitive Functions",
+      "category": "Network - Function Usage",
+      "odbc_query": "SELECT FUNCTION_ID, DEFAULT_USAGE, ALLOBJ_INDICATOR FROM QSYS2.FUNCTION_INFO WHERE FUNCTION_ID LIKE '%ALLOBJ%' OR FUNCTION_ID LIKE '%SERVICE%' OR FUNCTION_ID LIKE '%SECADM%' OR FUNCTION_ID LIKE 'QIBM_DB2_%'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Security-sensitive function usage IDs should default to DENIED with specific users/groups explicitly authorized, not a broad ALLOWED default. ALLOBJ_INDICATOR additionally shows whether a user with *ALLOBJ special authority can use the function regardless of the usage setting - review both columns together."
+      },
+      "command_used_label": "SELECT FUNCTION_ID, DEFAULT_USAGE, ALLOBJ_INDICATOR FROM QSYS2.FUNCTION_INFO WHERE ...",
+      "recommendation": "Set DEFAULT_USAGE to DENIED for sensitive function usage IDs and explicitly grant specific administrative users/groups per the Principle of Least Privilege: CHGFCNUSG FCNID(function-id) USER(profile) USAGE(*ALLOWED)."
+    },
+    {
+      "id": "NW-004",
+      "cis_ref": "5.2.10",
+      "name": "TELNET SSL/TLS Enforcement",
+      "category": "Network - Services",
+      "odbc_query": "SELECT AUTOSTART_SERVER, ALLOW_TRANSPORT_LAYER_SECURITY FROM QSYS2.TELNET_SERVER_ATTRIBUTES",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "ALLOW_TRANSPORT_LAYER_SECURITY",
+        "allowed": [
+          "*ONLY"
+        ]
+      },
+      "recommendation": "Require TLS for all TELNET (5250) sessions: CHGTELNA ALWSSL(*ONLY). Plaintext TELNET otherwise exposes 5250 session credentials and screen data to network interception. If TELNET isn't required at all, end the server instead (ENDTCPSVR SERVER(*TELNET)). Note: QSYS2.TELNET_SERVER_ATTRIBUTES requires IBM i 7.4 TR6 / 7.5 or later - on older releases this check will ERROR (view not found) and CHGTELNA + F4 remains the fallback.",
+      "command_used_label": "SELECT AUTOSTART_SERVER, ALLOW_TRANSPORT_LAYER_SECURITY FROM QSYS2.TELNET_SERVER_ATTRIBUTES"
+    },
+    {
+      "id": "NW-005",
+      "cis_ref": "5.2.11",
+      "name": "FTP SSL/TLS Enforcement",
+      "category": "Network - Services",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "IBM i does not expose the FTP attribute (ALWSSL) via a QSYS2 SQL view - it must be checked interactively: run CHGFTPA and press F4, then confirm 'Allow Secure Socket Layer' is set to *ONLY.",
+      "manual_command": "CHGFTPA (press F4 to display current values)",
+      "recommendation": "Require TLS for FTP: CHGFTPA ALWSSL(*ONLY). If FTP isn't required, end the server (ENDTCPSVR SERVER(*FTP)) rather than leaving a plaintext credential/data path available."
+    },
+    {
+      "id": "NW-006",
+      "cis_ref": "5.2.2",
+      "name": "DDM SNA Remote Location Security (Secure Loc)",
+      "category": "Network - DDM",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Checked via DSPCFGL CFGL(QAPPNRMT) (if the configuration list doesn't exist, the system isn't configured for DDM over SNA and this control doesn't apply). Confirm every remote location entry's Secure Loc parameter is *VFYENCPWD.",
+      "manual_command": "DSPCFGL CFGL(QAPPNRMT)",
+      "recommendation": "For every DDM SNA remote location entry, set Secure Loc to *VFYENCPWD via WRKCFGL CFGL(QAPPNRMT), requiring encrypted password verification for DDM connections over SNA rather than accepting unverified/plaintext connections."
+    },
+    {
+      "id": "NW-007",
+      "cis_ref": "5.2.3",
+      "name": "DDM TCP/IP Attributes (Password Encryption)",
+      "category": "Network - DDM",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Checked via DSPDDMTCPA / WRKTCPSTS or the DDM TCP/IP attribute display; verify PWDRQD requires encrypted passwords and ENCALG is a strong algorithm (*AES).",
+      "manual_command": "CHGDDMTCPA (press F4 to display current values)",
+      "recommendation": "Require encrypted DDM passwords over TCP/IP: CHGDDMTCPA PWDRQD(*USRENCPWD or *ENCUSRPWD) ENCALG(*AES). Plaintext DDM credentials over the network are otherwise trivially sniffable."
+    },
+    {
+      "id": "NS-001",
+      "cis_ref": "5.3.1",
+      "name": "NetServer Guest Profile",
+      "category": "Network - NetServer (SMB)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "IBM i NetServer configuration is managed through the 5250 NETS menu, not a QSYS2 SQL view. Verify via: ADDLIBLE NETSRVCMD; GO NETS; option 10 (Display Attributes) - confirm Guest profile is *NONE.",
+      "manual_command": "GO NETS -> option 10 (Display Attributes)",
+      "recommendation": "Disable the NetServer guest profile so unauthenticated SMB clients cannot connect: CHGNSVA GUESTPRF(*NONE), then ENDNSV / STRNSV RESET(*YES) to apply."
+    },
+    {
+      "id": "NS-002",
+      "cis_ref": "5.3.3",
+      "name": "NetServer SMB Message Signing",
+      "category": "Network - NetServer (SMB)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Checked via GO NETS -> option 10 (Display Attributes); confirm Message authentication is *REQUIRED.",
+      "manual_command": "GO NETS -> option 10 (Display Attributes)",
+      "recommendation": "Require SMB message signing to prevent man-in-the-middle tampering of file-share traffic: CHGNSVA MSGAUT(*REQUIRED), then ENDNSV / STRNSV RESET(*YES)."
+    },
+    {
+      "id": "NS-003",
+      "cis_ref": "5.3.4",
+      "name": "NetServer SMB Protocol Version",
+      "category": "Network - NetServer (SMB)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Checked by calling the NetServer maintenance utility and reviewing the current SMB version flags before/after any change.",
+      "manual_command": "CALL QZLSMAINT PARM('40' '2')  (retrieve current flags)",
+      "recommendation": "Restrict NetServer to SMB2/SMB3 only, disabling the legacy SMB1 protocol: CALL QZLSMAINT PARM('40' '3') then CALL QZLSMAINT PARM('40' '1' '0X100'), and restart NetServer. SMB1 has well-known protocol-level vulnerabilities and should not be enabled on a hardened system."
+    },
+    {
+      "id": "NS-004",
+      "cis_ref": "5.3.5",
+      "name": "NetServer File Shares",
+      "category": "Network - NetServer (SMB)",
+      "odbc_query": "SELECT SERVER_SHARE_NAME, SHARE_TYPE, TEXT_DESCRIPTION, ENCRYPTION_REQUIRED, PATH_NAME, PERMISSIONS, MAXIMUM_CONNECTIONS, CURRENT_CONNECTIONS FROM QSYS2.SERVER_SHARE_INFO WHERE SHARE_TYPE = 'FILE'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Review every file share for business justification, and specifically confirm there is no share exposing the IFS root ('/') - a root share defeats IFS-level object security entirely for any user who can reach it. ENCRYPTION_REQUIRED='NO' means the share accepts unencrypted SMB access from pre-SMB3 or non-encrypting clients."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.SERVER_SHARE_INFO WHERE SHARE_TYPE='FILE'",
+      "recommendation": "Remove any share exposing the IFS root directory; scope every remaining share to the minimum directory needed, with PERMISSION set no broader than the business requires (read-only where write access isn't needed). Root-share removal is done via GO NETS -> option 4."
+    },
+    {
+      "id": "NS-005",
+      "cis_ref": "5.3.6",
+      "name": "NetServer Browse Interval",
+      "category": "Network - NetServer (SMB)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Checked via GO NETS -> option 10 (Display Attributes); confirm Browse interval is 0 (disabled).",
+      "manual_command": "GO NETS -> option 10 (Display Attributes)",
+      "recommendation": "Disable NetServer browse list advertisement (not needed by modern SMB clients and unnecessarily broadcasts share presence): CHGNSVA BROWSEITV(*NONE), then ENDNSV / STRNSV RESET(*YES)."
+    },
+    {
+      "id": "SSH-001",
+      "cis_ref": "5.4.1",
+      "name": "SSH Daemon - Protocol Version 2 Only",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_all_present",
+        "patterns": [
+          "^\\s*Protocol\\s+2\\s*$"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Explicitly set 'Protocol 2' in sshd_config (SSH protocol 1 is cryptographically broken and must not be enabled). Recycle the SSH daemon after editing for the change to take effect."
+    },
+    {
+      "id": "SSH-002",
+      "cis_ref": "5.4.2",
+      "name": "SSH Daemon - Login Banner Configured",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_all_present",
+        "patterns": [
+          "^\\s*Banner\\s+\\S+"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Configure an SSH pre-authentication banner (Banner /path/to/banner-file in sshd_config) displaying your organization's acceptable-use / authorized-access-only notice, which supports legal action against unauthorized access attempts."
+    },
+    {
+      "id": "SSH-003",
+      "cis_ref": "5.4.3",
+      "name": "SSH Daemon - Host-Based Authentication Disabled",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_none_present",
+        "patterns": [
+          "^\\s*HostbasedAuthentication\\s+yes"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Ensure 'HostbasedAuthentication no' is set (not commented out / left at a permissive default) - host-based auth trusts the client's IP/hostname instead of the user's own credentials, which is easy to spoof on a compromised network segment."
+    },
+    {
+      "id": "SSH-004",
+      "cis_ref": "5.4.4",
+      "name": "SSH Daemon - Privilege Separation Enabled",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_none_present",
+        "patterns": [
+          "^\\s*UsePrivilegeSeparation\\s+no"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Ensure UsePrivilegeSeparation is not set to 'no' - privilege separation runs most of the SSH daemon's pre-authentication code in an unprivileged, sandboxed process, limiting the impact of a daemon-level vulnerability."
+    },
+    {
+      "id": "SSH-005",
+      "cis_ref": "5.4.5",
+      "name": "SSH Daemon - MaxAuthTries <= 4",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_all_present",
+        "patterns": [
+          "^\\s*MaxAuthTries\\s+[1-4]\\s*$"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Set 'MaxAuthTries 4' (or lower) in sshd_config to limit brute-force authentication attempts per connection."
+    },
+    {
+      "id": "SSH-006",
+      "cis_ref": "5.4.6",
+      "name": "SSH Daemon - Idle Client Timeout",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_all_present",
+        "patterns": [
+          "^\\s*ClientAliveInterval\\s+([1-9]|[1-9][0-9]|[1-2][0-9][0-9]|300)\\s*$",
+          "^\\s*ClientAliveCountMax\\s+0\\s*$"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Set ClientAliveInterval between 1-300 (300 recommended) and ClientAliveCountMax 0, so an idle SSH session is terminated automatically (e.g. after 5 minutes) rather than remaining open indefinitely if a user walks away."
+    },
+    {
+      "id": "SSH-007",
+      "cis_ref": "5.4.7",
+      "name": "SSH Daemon - Restricted Cipher List",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_none_present",
+        "patterns": [
+          "^\\s*Ciphers\\s+.*\\b(3des|arcfour|blowfish|cast128|rc4|none)\\b"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Restrict the Ciphers directive to strong, modern algorithms only (e.g. aes256-ctr,aes192-ctr,aes128-ctr or the current AEAD ciphers your OpenSSH build supports) and remove legacy/weak ciphers (3DES, RC4/arcfour, Blowfish, CAST128, or 'none')."
+    },
+    {
+      "id": "SSH-008",
+      "cis_ref": "5.4.8",
+      "name": "SSH Daemon - Access Restricted to Named Users/Groups",
+      "category": "Network - SSH Server",
+      "odbc_query": null,
+      "ssh_command": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config 2>/dev/null",
+      "evaluation": {
+        "type": "ssh_regex_all_present",
+        "patterns": [
+          "^\\s*(AllowUsers|AllowGroups)\\s+\\S+"
+        ]
+      },
+      "command_used_label": "cat /QOpenSys/QIBM/UserData/SC1/OpenSSH/etc/sshd_config",
+      "recommendation": "Add an AllowUsers or AllowGroups directive naming exactly which accounts may connect over SSH, rather than allowing any valid user profile - this is defense in depth even where user-level authority already restricts what a session can do."
+    },
+    {
+      "id": "PM-001",
+      "cis_ref": "5.5.1",
+      "name": "PTF Group Currency",
+      "category": "Patch Management",
+      "odbc_query": "SELECT PTF_GROUP_ID, PTF_GROUP_TITLE, PTF_GROUP_LEVEL_INSTALLED, PTF_GROUP_LEVEL_AVAILABLE, PTF_GROUP_CURRENCY FROM SYSTOOLS.GROUP_PTF_CURRENCY WHERE PTF_GROUP_CURRENCY = 'UPDATE AVAILABLE'",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Any PTF group showing 'UPDATE AVAILABLE' means the system is behind IBM's latest published level for that group. This view calls out to IBM's Preventive Service Planning site live when queried - if the system has no internet path, PTF_GROUP_CURRENCY will show 'PSP INFORMATION NOT AVAILABLE' instead, which is a connectivity limitation, not a clean result."
+      },
+      "command_used_label": "SELECT ... FROM SYSTOOLS.GROUP_PTF_CURRENCY WHERE PTF_GROUP_CURRENCY = 'UPDATE AVAILABLE'",
+      "recommendation": "Download and apply the current level of every applicable PTF group (especially the Cumulative, HIPER, Security, and Db2 groups) per your organization's patch management cadence, and re-run this check to confirm currency after applying."
+    },
+    {
+      "id": "SST-001",
+      "cis_ref": "5.6.1",
+      "name": "SST Password Expiration Interval",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify Service tools password expiration interval",
+      "recommendation": "Set the Service Tools password expiration interval to 365 days: CHGSSTSECA REQUSRID(id) REQPWD(pwd) PWDEXPITV(365)."
+    },
+    {
+      "id": "SST-002",
+      "cis_ref": "5.6.2",
+      "name": "SST Maximum Failed Sign-On Attempts",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify Service tools Maximum sign-on attempts",
+      "recommendation": "Set the SST maximum failed sign-on attempts to 5: CHGSSTSECA REQUSRID(id) REQPWD(pwd) MAXSGN(5)."
+    },
+    {
+      "id": "SST-003",
+      "cis_ref": "5.6.3",
+      "name": "SST Duplicate Password Control",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify Service Duplicate password control",
+      "recommendation": "Set the SST duplicate password control to 18 (cannot reuse last 18 SST passwords): CHGSSTSECA REQUSRID(id) REQPWD(pwd) DUPPWDCTL(18)."
+    },
+    {
+      "id": "SST-004",
+      "cis_ref": "5.6.4",
+      "name": "SST Password Level",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify Service tools password level",
+      "recommendation": "Set the SST password level to 3 (strongest available complexity/length support): CHGSSTSECA REQUSRID(id) REQPWD(pwd) SSTPWDLVL(3)."
+    },
+    {
+      "id": "SST-005",
+      "cis_ref": "5.6.5",
+      "name": "SST Allow New Digital Certificates",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify Service tools Allow add of digital certificates",
+      "recommendation": "Set 'Allow add of digital certificates' to *NO unless a certificate management operation is actively underway: CHGSSTSECA REQUSRID(id) REQPWD(pwd) ADDDIGCERT(*NO)."
+    },
+    {
+      "id": "SST-006",
+      "cis_ref": "5.6.6",
+      "name": "SST IDs and Privileges",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTUSR has no QSYS2 SQL view; check interactively.",
+      "manual_command": "DSPSSTUSR",
+      "recommendation": "Ensure every SST user ID is unique (no shared/default IBM-shipped IDs in active use) and carries only the privileges its job role requires, per the Principle of Least Privilege. Disable or remove SST IDs no longer needed."
+    },
+    {
+      "id": "SST-007",
+      "cis_ref": "5.6.7",
+      "name": "SST Locking of Security-Related System Values",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify 'Allow change of security related system values'",
+      "recommendation": "Lock security-related system values from change during normal operations: CHGSSTSECA REQUSRID(id) REQPWD(pwd) SECSYSVAL(*NO). Unlock only during planned maintenance windows."
+    },
+    {
+      "id": "SST-008",
+      "cis_ref": "5.6.8",
+      "name": "SST Password Rules",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify SST password composition rules",
+      "recommendation": "Configure SST password rules to enforce strong composition (limit profile-name reuse, block period, minimum length, complexity) via CHGSSTSECA PWDRULES(...) - align the specific parameter values with your organization's password policy and IBM's current CHGSSTSECA documentation for your release."
+    },
+    {
+      "id": "SST-009",
+      "cis_ref": "5.6.9",
+      "name": "SST Allow Add/Remove of Password Exit Programs",
+      "category": "System Service Tools (SST)",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "DSPSSTSECA has no QSYS2 SQL view or clean SSH-scriptable output; check interactively.",
+      "manual_command": "DSPSSTSECA -> verify 'Allow add and remove of password exit program'",
+      "recommendation": "Set 'Allow add and remove of password exit program' to *NO so SST-level administrators can't silently add/remove password exit programs outside change control: CHGSSTSECA REQUSRID(id) REQPWD(pwd) PWDEXITPGM(*NO)."
+    },
+    {
+      "id": "QSO-001",
+      "cis_ref": "6.1",
+      "name": "QSECOFR Profile Is Disabled",
+      "category": "QSECOFR Profile",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, STATUS, PREVIOUS_SIGNON FROM QSYS2.USER_INFO WHERE AUTHORIZATION_NAME = 'QSECOFR'",
+      "ssh_command": "system \"DSPUSRPRF USRPRF(QSECOFR)\"",
+      "evaluation": {
+        "type": "string_in_set",
+        "field": "STATUS",
+        "allowed": [
+          "*DISABLED"
+        ]
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE AUTHORIZATION_NAME='QSECOFR'",
+      "recommendation": "Disable the shipped QSECOFR profile for day-to-day use: CHGUSRPRF USRPRF(QSECOFR) STATUS(*DISABLED). Administrators should use individually named profiles with *SECOFR class/authorities (for accountability) and re-enable QSECOFR only for specific recovery scenarios (e.g. after a mass lockout), then re-disable it immediately after."
+    },
+    {
+      "id": "QSO-002",
+      "cis_ref": "6.2",
+      "name": "QSECOFR Not Used as a Group Profile",
+      "category": "QSECOFR Profile",
+      "odbc_query": "SELECT AUTHORIZATION_NAME, GROUP_PROFILE_NAME, SUPPLEMENTAL_GROUP_LIST FROM QSYS2.USER_INFO WHERE GROUP_PROFILE_NAME = 'QSECOFR' OR SUPPLEMENTAL_GROUP_LIST LIKE '%QSECOFR%'",
+      "ssh_command": "system \"DSPUSRPRF USRPRF(QSECOFR) TYPE(*GRPMBR)\"",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Any profile returned here has QSECOFR as its group or supplemental group, which would grant that user QSECOFR's authorities implicitly - this should never occur."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.USER_INFO WHERE GROUP_PROFILE_NAME='QSECOFR' OR SUPPLEMENTAL_GROUP_LIST LIKE '%QSECOFR%'",
+      "recommendation": "Remove QSECOFR as a group/supplemental-group profile from any user found: CHGUSRPRF USRPRF(profile) GRPPRF(*NONE) (or point it to an appropriately scoped custom group instead)."
+    },
+    {
+      "id": "IFS-001",
+      "cis_ref": "",
+      "name": "IFS Root Directory (/) *PUBLIC Authority",
+      "category": "Integrated File System (IFS)",
+      "odbc_query": "SELECT PATH_NAME, AUTHORIZATION_NAME, DATA_AUTHORITY, OBJECT_MANAGEMENT, OBJECT_EXISTENCE, DATA_ADD, DATA_UPDATE, DATA_DELETE FROM TABLE(QSYS2.IFS_OBJECT_PRIVILEGES('/')) WHERE AUTHORIZATION_NAME = '*PUBLIC'",
+      "ssh_command": "ls -ld /",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Compare DATA_AUTHORITY / DATA_ADD / DATA_UPDATE / DATA_DELETE for *PUBLIC against your baseline. *PUBLIC having write authority (DATA_ADD, DATA_UPDATE, or DATA_DELETE = YES) on the IFS root is a high-severity finding - it means any authenticated user/job could create, modify, or delete objects anywhere authority isn't independently restricted further down the tree."
+      },
+      "command_used_label": "SELECT ... FROM TABLE(QSYS2.IFS_OBJECT_PRIVILEGES('/')) WHERE AUTHORIZATION_NAME='*PUBLIC'",
+      "recommendation": "If *PUBLIC has write authority on '/', restrict it: CHGAUT OBJ('/') USER(*PUBLIC) DTAAUT(*RX) OBJAUT(*NONE) (adjust to your environment's actual requirement - test this change carefully, since overly aggressive root restriction can break IBM-supplied subsystems that rely on specific IFS access). Prefer securing individual sensitive directories over relying on root alone."
+    },
+    {
+      "id": "IFS-002",
+      "cis_ref": "",
+      "name": "*PUBLIC Write Access on Top-Level IFS Directories",
+      "category": "Integrated File System (IFS)",
+      "odbc_query": "SELECT A.PATH_NAME, A.OBJECT_TYPE, A.OBJECT_OWNER, B.AUTHORIZATION_NAME, B.DATA_AUTHORITY FROM TABLE(QSYS2.IFS_OBJECT_STATISTICS(START_PATH_NAME=>'/', SUBTREE_DIRECTORIES=>'NO')) A, TABLE(QSYS2.IFS_OBJECT_PRIVILEGES(A.PATH_NAME)) B WHERE B.AUTHORIZATION_NAME = '*PUBLIC' AND (B.DATA_ADD = 'YES' OR B.DATA_UPDATE = 'YES' OR B.DATA_DELETE = 'YES')",
+      "ssh_command": "ls -la /",
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Lists immediate children of the IFS root where *PUBLIC has add/update/delete authority. Review each against what it should be - some IBM-shipped directories are intentionally more open (e.g. /tmp), but application/data directories with *PUBLIC write access are typically findings. This check is deliberately non-recursive (top level only) to keep runtime reasonable - use IFS-003 as a template for a deeper, scoped scan."
+      },
+      "command_used_label": "SELECT ... FROM TABLE(QSYS2.IFS_OBJECT_STATISTICS('/', SUBTREE_DIRECTORIES=>'NO')) A JOIN TABLE(QSYS2.IFS_OBJECT_PRIVILEGES(A.PATH_NAME)) B WHERE *PUBLIC has write authority",
+      "recommendation": "For each flagged directory, confirm whether *PUBLIC write access is required. Where it isn't, tighten it: CHGAUT OBJ('/path') USER(*PUBLIC) DTAAUT(*RX) OBJAUT(*NONE). For application-owned directories, prefer authorizing a specific group profile instead of *PUBLIC."
+    },
+    {
+      "id": "IFS-003",
+      "cis_ref": "",
+      "name": "Scoped Recursive IFS Permission Scan (Application Directory Template)",
+      "category": "Integrated File System (IFS)",
+      "odbc_query": "SELECT A.PATH_NAME, A.OBJECT_TYPE, A.OBJECT_OWNER, B.AUTHORIZATION_NAME, B.DATA_AUTHORITY FROM TABLE(QSYS2.IFS_OBJECT_STATISTICS(START_PATH_NAME=>'/home', SUBTREE_DIRECTORIES=>'YES')) A, TABLE(QSYS2.IFS_OBJECT_PRIVILEGES(A.PATH_NAME)) B WHERE B.AUTHORIZATION_NAME = '*PUBLIC' AND (B.DATA_ADD = 'YES' OR B.DATA_UPDATE = 'YES' OR B.DATA_DELETE = 'YES')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "TEMPLATE CHECK: defaults to scanning /home recursively. Edit the START_PATH_NAME parameter in this check's odbc_query (in checks_config.json) to point at the actual application/data directories in scope for this engagement before relying on it - a full recursive scan from '/' can be slow/expensive on a live system and should be scoped deliberately rather than run blind."
+      },
+      "command_used_label": "SELECT ... FROM TABLE(QSYS2.IFS_OBJECT_STATISTICS(START_PATH_NAME=>'/home', SUBTREE_DIRECTORIES=>'YES')) A JOIN TABLE(QSYS2.IFS_OBJECT_PRIVILEGES(A.PATH_NAME)) B WHERE *PUBLIC has write authority",
+      "recommendation": "Adjust START_PATH_NAME to the application's actual IFS footprint for this engagement, then tighten any flagged object: CHGAUT OBJ('/path') USER(*PUBLIC) DTAAUT(*RX) OBJAUT(*NONE), or scope authority via a dedicated group profile instead of *PUBLIC."
+    },
+    {
+      "id": "AA-001",
+      "cis_ref": "",
+      "name": "Programs Adopting a Powerful Profile's Authority",
+      "category": "Adopted Authority",
+      "odbc_query": "SELECT PROGRAM_LIBRARY, PROGRAM_NAME, PROGRAM_TYPE, PROGRAM_OWNER, USER_PROFILE, USE_ADOPTED_AUTHORITY FROM QSYS2.PROGRAM_INFO WHERE USER_PROFILE = '*OWNER' AND PROGRAM_LIBRARY NOT LIKE 'Q%' AND PROGRAM_OWNER IN (SELECT AUTHORIZATION_NAME FROM QSYS2.USER_INFO WHERE SPECIAL_AUTHORITIES LIKE '%*ALLOBJ%' OR AUTHORIZATION_NAME = 'QSECOFR')",
+      "ssh_command": null,
+      "evaluation": {
+        "type": "row_count_review",
+        "note": "Excludes IBM-supplied libraries (Q*) since IBM's own programs adopting authority are expected/by design and not a finding - this also avoids scanning thousands of system objects, which is the slow part of this query on most IBM i systems. QSYS2.PROGRAM_INFO with no library filter forces a full-catalog scan and can take several minutes on a system with many libraries; this filter is a meaningful, permanent scope reduction, not just a workaround. On a system with a very large number of user libraries, further narrow this further by editing the query to add: AND PROGRAM_LIBRARY IN ('APPLIB1','APPLIB2', ...) for just the libraries in scope for this engagement."
+      },
+      "command_used_label": "SELECT ... FROM QSYS2.PROGRAM_INFO WHERE USER_PROFILE='*OWNER' AND PROGRAM_LIBRARY NOT LIKE 'Q%' AND PROGRAM_OWNER has *ALLOBJ",
+      "recommendation": "For each program that doesn't need to adopt authority, remove adoption: CHGPGM PGM(library/program) USRPRF(*USER) (or CHGSRVPGM for service programs). Where adoption is genuinely required, ensure the program is owned by a tightly-scoped profile with only the specific authorities the task needs - not QSECOFR or another *ALLOBJ profile - and that the program validates all input before acting on it, since adoption amplifies the impact of any injection-style flaw. If this check times out even with the Q* library exclusion, scope it to your application libraries directly (see the check's evaluation note in checks_config.json) rather than raising the connector's query timeout indefinitely."
+    },
+    {
+      "id": "MV-001",
+      "cis_ref": "",
+      "name": "Terminal Client (5250) User Enumeration",
+      "category": "Manual Verification - Retest Items",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "Not a configuration value - this is a protocol behavior test with no SQL/CL equivalent. To verify: attempt sign-on via 5250 (Telnet or emulator) with (a) a known-valid username and wrong password, and (b) a definitely-invalid/nonexistent username. Compare the exact error message text, message ID (e.g. CPF1120 vs CPF1107 vs CPF1394), and response timing between the two. If they differ in any observable way, valid usernames can be enumerated pre-authentication.",
+      "manual_command": "Manual 5250 sign-on attempts with valid vs invalid usernames - compare error text/message ID/timing",
+      "recommendation": "If sign-on responses differ between valid and invalid usernames, this generally can't be fixed via a system value alone - it's inherent to the standard 5250 sign-on error messages. Mitigate via network-level controls (restrict which source IPs can reach the sign-on port at all), enforce QMAXSIGN/QMAXSGNACN lockout tightly (see SV-002/SV-003) to limit enumeration speed, and consider exit-point-based logging/alerting on repeated invalid sign-on attempts."
+    },
+    {
+      "id": "MV-002",
+      "cis_ref": "",
+      "name": "ODBC Remote Command Execution (Exploitability Verification)",
+      "category": "Manual Verification - Retest Items",
+      "odbc_query": null,
+      "ssh_command": null,
+      "evaluation": {
+        "type": "manual_only"
+      },
+      "manual_note": "EX-001/EX-002 (Exit Points) show whether an exit program is REGISTERED for the ODBC/remote-command exit points, but registration alone doesn't prove commands are actually blocked - the exit program's logic has to be reviewed or tested directly. With client authorization, verify by attempting a benign remote command via ODBC (e.g. CALL QSYS2.QCMDEXC('CALL QSYS/CRTDUPOBJ...') or similar low-impact test agreed with the client) using a low-privileged test account, and confirming it is actually rejected.",
+      "manual_command": "Cross-reference EX-001/EX-002 results, then test with client-agreed low-privilege credentials and a benign command",
+      "recommendation": "If remote command execution succeeds where it shouldn't, review the registered exit program's logic (or register one if none exists - see EX-001/EX-002 recommendations) to explicitly deny command execution for accounts/IPs that don't need it, and ensure LMTCPB(*YES) is set on profiles that shouldn't have command-line capability (see UP-010) - noting LMTCPB alone does not block ODBC/remote command server access, which is exactly why exit-point enforcement matters here."
+    }
+  ]
+}

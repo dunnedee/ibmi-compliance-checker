@@ -1,0 +1,13 @@
+# IBM i (AS400) Configuration Review Tool - dependencies
+#
+# ODBC mode requires:
+#   1. pyodbc (pip)
+#   2. IBM i Access Client Solutions ODBC driver installed on THIS machine
+#      (Windows: "IBM i Access ODBC Driver"; Linux: iAccess Linux ODBC package)
+#
+# SSH mode requires:
+#   1. paramiko (pip)
+#   2. SSH daemon enabled on the target IBM i (STRTCPSVR SERVER(*SSHD))
+
+pyodbc>=5.1.0
+paramiko>=3.4.0

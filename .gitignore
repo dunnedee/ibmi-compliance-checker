@@ -1,0 +1,10 @@
+   __pycache__/
+   *.pyc
+   reports/
+   autosave_*
+   IBMiAccess*/
+   *.zip
+   *.pdf
+   *.docx
+   *.xlsx
+   .env
